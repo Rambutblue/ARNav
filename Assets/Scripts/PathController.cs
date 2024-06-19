@@ -37,13 +37,10 @@ public class PathController : MonoBehaviour
         
         newLink.transform.position = midpoint;
         
-        
-        Vector3 newScale = newLink.transform.localScale;
-        newScale.z = distance; 
-        newLink.transform.localScale = newScale;
-        
-        
         newLink.transform.rotation = Quaternion.LookRotation(endPoint - startPoint);
+
+        LinkController newLinkController = newLink.GetComponent<LinkController>();
+        newLinkController.Initialize(distance);
     }
 
     private List<PathNode> FindPath(string start, string end)
