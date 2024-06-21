@@ -8,16 +8,17 @@ public class ItemPrefab : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textField;
 
     private string currText;
-    //TODO callback
+    private OnPlaceSelected onPlaceSelected;
 
-    public void Bind(string text)
+    public void Bind(string text, OnPlaceSelected callback)
     {
         currText = text;
         textField.text = currText;
+        onPlaceSelected = callback;
     }
 
     public void Select()
     {
-        //callback
+        onPlaceSelected?.Invoke(currText);
     }
 }
