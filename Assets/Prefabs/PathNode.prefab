@@ -49,6 +49,8 @@ MonoBehaviour:
   name: 
   visible: 0
   neighbours: []
+  NameTag: {fileID: 3930265180615261438}
+  NameText: {fileID: 250933891316730396}
 --- !u!1 &3048742004839526035
 GameObject:
   m_ObjectHideFlags: 0

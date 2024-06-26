@@ -2,29 +2,153 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using Utils;
 
 public class PathController : MonoBehaviour
 {
     [SerializeField] private List<PathNode> availableNodes;
     [SerializeField] private GameObject linkPrefab;
+    [SerializeField] private Transform linkContainerPrev;
+    [SerializeField] private Transform linkContainerNext;
+    [SerializeField] private GameObject player;
 
-    private void Start()
+    private List<PathNode> currentPath = new List<PathNode>();
+    private int currClosest = -5;
+    public List<PathNode> AvailableNodes => availableNodes;
+
+    public bool StartPath(string start, string end)
     {
-        var path = FindPath("1", "4");
-        foreach (var node in path)
-        {
-            Debug.Log(node.Name);
-        }
-
-        for (int i = 0; i < path.Count - 1; i++)
-        {
-            CreateLink(path[i], path[i + 1]);
-        }
+        if (start == end) return false;
+        currentPath = FindPath(start, end);
+        currClosest = -2;
+        return currentPath.Count > 0;
     }
 
-    private void CreateLink(PathNode start, PathNode end)
+    private void Update()
+    {
+        int closest = FindClosestPathIndex();
+        if (closest < 0) return;
+        if (currentPath.Count <= 0 || closest == currClosest) return;
+        if (currClosest + 1 == closest)
+        {
+            foreach (Transform child in linkContainerPrev)
+            {
+                Destroy(child.gameObject);
+            }
+            foreach (Transform path in linkContainerNext)
+            {
+                path.transform.SetParent(linkContainerPrev);
+            }
+            if (closest != currentPath.Count - 1)
+            {
+                CreateLink(currentPath[closest], currentPath[closest + 1], linkContainerNext);
+            }
+        }
+        else if (currClosest - 1 == closest)
+        {
+            foreach (Transform child in linkContainerNext)
+            {
+                Destroy(child.gameObject);
+            }
+            foreach (Transform path in linkContainerPrev)
+            {
+                path.transform.SetParent(linkContainerNext);
+            }
+            if (closest != 0)
+            {
+                CreateLink(currentPath[closest - 1], currentPath[closest], linkContainerPrev);
+            }
+        }
+        else
+        {
+            foreach (Transform child in linkContainerPrev)
+            {
+                Destroy(child.gameObject);
+            }
+                
+            foreach (Transform child in linkContainerNext)
+            {
+                Destroy(child.gameObject);
+            }
+            
+            if (closest != 0)
+            {
+                CreateLink(currentPath[closest - 1], currentPath[closest], linkContainerPrev);
+            }
+            if (closest != currentPath.Count - 1)
+            {
+                CreateLink(currentPath[closest], currentPath[closest + 1], linkContainerNext);
+            }
+        }
+
+        foreach (var node in availableNodes)
+        {
+            node.gameObject.SetActive(false);
+        }
+        
+        currentPath[closest].gameObject.SetActive(true);
+        if (closest != 0)
+        {
+            currentPath[closest - 1].gameObject.SetActive(true);
+        }
+        if (closest != currentPath.Count - 1)
+        {
+            currentPath[closest + 1].gameObject.SetActive(true);
+        }
+        
+        currClosest = closest;
+    }
+
+    public PathNode FindClosestNode()
+    {
+        if (availableNodes.Count <= 0)
+        {
+            return null;
+        }
+
+        PathNode best = availableNodes[0];
+        float bestDist = Vector3.Distance(availableNodes[0].transform.position, player.transform.position);
+
+        foreach (var node in availableNodes)
+        {
+            float currDist = Vector3.Distance(node.transform.position, player.transform.position);
+            if (currDist < bestDist)
+            {
+                best = node;
+                bestDist = currDist;
+            }
+        }
+
+        return best;
+    }
+
+    private int FindClosestPathIndex()
+    {
+        if (currentPath.Count <= 0)
+        {
+            return -1;
+        }
+
+        int best = 0;
+        float bestDist = Vector3.Distance(currentPath[0].transform.position, player.transform.position);
+
+        for (int i = 0; i < currentPath.Count; i++)
+        {
+            float currDist = Vector3.Distance(currentPath[i].transform.position, player.transform.position);
+            if (currDist < bestDist)
+            {
+                best = i;
+                bestDist = currDist;
+            }
+        }
+
+        return best;
+    }
+
+    private void CreateLink(PathNode start, PathNode end, Transform linkContainer)
     {
         Vector3 startPoint = start.transform.position;
         Vector3 endPoint = end.transform.position;
@@ -33,7 +157,7 @@ public class PathController : MonoBehaviour
         
         float distance = Vector3.Distance(startPoint, endPoint);
 
-        GameObject newLink = Instantiate(linkPrefab);
+        GameObject newLink = Instantiate(linkPrefab, linkContainer);
         
         newLink.transform.position = midpoint;
         
@@ -46,6 +170,8 @@ public class PathController : MonoBehaviour
     private List<PathNode> FindPath(string start, string end)
     {
         List<PathNode> result = new List<PathNode>();
+
+        if (availableNodes.Count <= 0) return result;
 
         PathNode startNode = null;
         PathNode endNode = null;
@@ -71,7 +197,7 @@ public class PathController : MonoBehaviour
             distances[node] = -1;
         }
 
-        if (startNode == null) return result;
+        if (startNode == null || endNode == null) return result;
 
         queue.Enqueue(startNode, 0);
 

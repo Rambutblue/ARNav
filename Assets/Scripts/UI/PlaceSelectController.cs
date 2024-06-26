@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using Scripts.Util;
 using TMPro;
 using UnityEngine;
 
@@ -14,19 +15,15 @@ public class PlaceSelectController : MonoBehaviour
     [SerializeField] private Transform contentTransform;
     [SerializeField] private GameObject prefab;
     [SerializeField] private TMP_InputField inputText;
+    [SerializeField] private Fade fade;
 
     private OnPlaceSelected onPlaceSelected;
-    private List<string> options = new List<string> { "apple", "banana", "apricot", "berry", "avocado", "blueberry" };
+    private List<PathNode> options = new List<PathNode>();
 
-    private void Start()
-    {
-        List<string> words = options;
-        Open(words, id => { });
-    }
-
-    public void Open(List<string> options, OnPlaceSelected callback)
+    public void Open(List<PathNode> options, OnPlaceSelected callback)
     {
         gameObject.SetActive(true);
+        fade.FadeIn();
         onPlaceSelected = callback;
         this.options = options;
         InstantiateItems(options);
@@ -34,10 +31,10 @@ public class PlaceSelectController : MonoBehaviour
 
     private void Close()
     {
-        gameObject.SetActive(false);
+        fade.FadeOut(() => gameObject.SetActive(false));
     }
 
-    private void InstantiateItems(List<string> items)
+    private void InstantiateItems(List<PathNode> items)
     {
         foreach (Transform child in contentTransform)
         {
@@ -47,9 +44,8 @@ public class PlaceSelectController : MonoBehaviour
         {
             GameObject newItem = Instantiate(prefab, contentTransform);
             ItemPrefab newItemPrefab = newItem.GetComponent<ItemPrefab>();
-            newItemPrefab.Bind(item, (id =>
+            newItemPrefab.Bind(item.Name, (id =>
             {
-                Debug.Log("[DEBUG] here");
                 Close();
                 onPlaceSelected?.Invoke(id);
             }));
@@ -58,16 +54,14 @@ public class PlaceSelectController : MonoBehaviour
 
     public void OnStringChanged(string param)
     {
-        string filter = inputText.text; //String.Copy(inputText.text);
+        string filter = inputText.text;
         
         Debug.Log(filter);
         
-        List<string> filtered = options
-            .Where(word => word.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(word => word)
+        List<PathNode> filtered = options
+            .Where(item => item.Name.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(name => name.Name)
             .ToList();
-
-        filtered.Sort();
 
         InstantiateItems(filtered);
     }
