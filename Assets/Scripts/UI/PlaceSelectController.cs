@@ -13,14 +13,14 @@ public class PlaceSelectController : MonoBehaviour
 {
     [SerializeField] private Transform contentTransform;
     [SerializeField] private GameObject prefab;
-    [SerializeField] private TextMeshProUGUI inputText;
+    [SerializeField] private TMP_InputField inputText;
 
     private OnPlaceSelected onPlaceSelected;
     private List<string> options = new List<string> { "apple", "banana", "apricot", "berry", "avocado", "blueberry" };
 
     private void Start()
     {
-        List<string> words = new List<string> { "apple", "banana", "apricot", "berry", "avocado", "blueberry" };
+        List<string> words = options;
         Open(words, id => { });
     }
 
@@ -49,6 +49,7 @@ public class PlaceSelectController : MonoBehaviour
             ItemPrefab newItemPrefab = newItem.GetComponent<ItemPrefab>();
             newItemPrefab.Bind(item, (id =>
             {
+                Debug.Log("[DEBUG] here");
                 Close();
                 onPlaceSelected?.Invoke(id);
             }));
@@ -57,20 +58,17 @@ public class PlaceSelectController : MonoBehaviour
 
     public void OnStringChanged(string param)
     {
-        string filter = inputText.text;
+        string filter = inputText.text; //String.Copy(inputText.text);
         
         Debug.Log(filter);
         
         List<string> filtered = options
-            .Where(word => word.StartsWith(filter))
+            .Where(word => word.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
             .OrderBy(word => word)
             .ToList();
 
-        foreach (var item in filtered)
-        {
-            Debug.Log(item);
-        }
-        
+        filtered.Sort();
+
         InstantiateItems(filtered);
     }
 }
