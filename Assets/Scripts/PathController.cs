@@ -219,6 +219,11 @@ public class PathController : MonoBehaviour
             
         }
 
+        if (distances[endNode] < 0)
+        {
+            return result;
+        }
+
         var reconstructingNode = endNode;
         while (reconstructingNode != startNode)
         {

@@ -13,11 +13,6 @@ public class PathSelectController : MonoBehaviour
     [SerializeField] private PlaceSelectController placeSelectController;
     [SerializeField] private PathController pathController;
 
-    private void Start()
-    {
-        Open();
-    }
-
     public void Open()
     {
         gameObject.SetActive(true);

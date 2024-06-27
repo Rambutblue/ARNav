@@ -29,7 +29,7 @@ public class PlaceSelectController : MonoBehaviour
         InstantiateItems(options);
     }
 
-    private void Close()
+    public void Close()
     {
         fade.FadeOut(() => gameObject.SetActive(false));
     }
