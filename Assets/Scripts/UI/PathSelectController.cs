@@ -21,6 +21,11 @@ public class PathSelectController : MonoBehaviour
         fromText.text = pathController.FindClosestNode()?.Name;
     }
 
+    public void CancelPath()
+    {
+        pathController.CancelPath();
+    }
+
     public void Close()
     {
         fade.FadeOut( () => {gameObject.SetActive(false);});

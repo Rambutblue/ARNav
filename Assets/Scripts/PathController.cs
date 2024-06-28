@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using Utils;
@@ -25,6 +24,14 @@ public class PathController : MonoBehaviour
         currentPath = FindPath(start, end);
         currClosest = -2;
         return currentPath.Count > 0;
+    }
+
+    public void CancelPath()
+    {
+        currentPath = new List<PathNode>();
+        int closest = FindClosestPathIndex();
+        if (closest < 0) return;
+        UpdateFullPath(closest);
     }
 
     private void Update()
@@ -64,42 +71,32 @@ public class PathController : MonoBehaviour
         }
         else
         {
-            foreach (Transform child in linkContainerPrev)
-            {
-                Destroy(child.gameObject);
-            }
-                
-            foreach (Transform child in linkContainerNext)
-            {
-                Destroy(child.gameObject);
-            }
-            
-            if (closest != 0)
-            {
-                CreateLink(currentPath[closest - 1], currentPath[closest], linkContainerPrev);
-            }
-            if (closest != currentPath.Count - 1)
-            {
-                CreateLink(currentPath[closest], currentPath[closest + 1], linkContainerNext);
-            }
+            UpdateFullPath(closest);
         }
 
-        foreach (var node in availableNodes)
+        currClosest = closest;
+    }
+
+    private void UpdateFullPath(int closest)
+    {
+        foreach (Transform child in linkContainerPrev)
         {
-            node.gameObject.SetActive(false);
+            Destroy(child.gameObject);
         }
-        
-        currentPath[closest].gameObject.SetActive(true);
+                
+        foreach (Transform child in linkContainerNext)
+        {
+            Destroy(child.gameObject);
+        }
+            
         if (closest != 0)
         {
-            currentPath[closest - 1].gameObject.SetActive(true);
+            CreateLink(currentPath[closest - 1], currentPath[closest], linkContainerPrev);
         }
         if (closest != currentPath.Count - 1)
         {
-            currentPath[closest + 1].gameObject.SetActive(true);
+            CreateLink(currentPath[closest], currentPath[closest + 1], linkContainerNext);
         }
-        
-        currClosest = closest;
     }
 
     public PathNode FindClosestNode()
