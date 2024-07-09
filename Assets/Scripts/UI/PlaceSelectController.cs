@@ -18,9 +18,9 @@ public class PlaceSelectController : MonoBehaviour
     [SerializeField] private Fade fade;
 
     private OnPlaceSelected onPlaceSelected;
-    private List<PathNode> options = new List<PathNode>();
+    private List<string> options = new List<string>();
 
-    public void Open(List<PathNode> options, OnPlaceSelected callback)
+    public void Open(List<string> options, OnPlaceSelected callback)
     {
         gameObject.SetActive(true);
         fade.FadeIn();
@@ -34,7 +34,7 @@ public class PlaceSelectController : MonoBehaviour
         fade.FadeOut(() => gameObject.SetActive(false));
     }
 
-    private void InstantiateItems(List<PathNode> items)
+    private void InstantiateItems(List<string> items)
     {
         foreach (Transform child in contentTransform)
         {
@@ -44,7 +44,7 @@ public class PlaceSelectController : MonoBehaviour
         {
             GameObject newItem = Instantiate(prefab, contentTransform);
             ItemPrefab newItemPrefab = newItem.GetComponent<ItemPrefab>();
-            newItemPrefab.Bind(item.Name, (id =>
+            newItemPrefab.Bind(item, (id =>
             {
                 Close();
                 onPlaceSelected?.Invoke(id);
@@ -58,9 +58,9 @@ public class PlaceSelectController : MonoBehaviour
         
         Debug.Log(filter);
         
-        List<PathNode> filtered = options
-            .Where(item => item.Name.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(name => name.Name)
+        List<string> filtered = options
+            .Where(item => item.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(name => name)
             .ToList();
 
         InstantiateItems(filtered);

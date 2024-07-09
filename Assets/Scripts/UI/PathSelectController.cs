@@ -1,51 +1,51 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
 using Scripts.Util;
 using TMPro;
 using UnityEngine;
 
-public class PathSelectController : MonoBehaviour
+namespace UI
 {
-    [SerializeField] private Fade fade;
-    [SerializeField] private TextMeshProUGUI fromText;
-    [SerializeField] private TextMeshProUGUI toText;
-    [SerializeField] private PlaceSelectController placeSelectController;
-    [SerializeField] private PathController pathController;
-
-    public void Open()
+    public class PathSelectController : MonoBehaviour
     {
-        gameObject.SetActive(true);
-        fade.FadeIn();
-
-        fromText.text = pathController.FindClosestNode()?.Name;
-    }
-
-    public void CancelPath()
-    {
-        pathController.CancelPath();
-    }
-
-    public void Close()
-    {
-        fade.FadeOut( () => {gameObject.SetActive(false);});
-    }
-
-    public void FromSelect()
-    {
-        placeSelectController.Open(pathController.AvailableNodes, id => { fromText.text = id; });
-    }
+        [SerializeField] private Fade fade;
+        [SerializeField] private TextMeshProUGUI fromText;
+        [SerializeField] private TextMeshProUGUI toText;
+        [SerializeField] private PlaceSelectController placeSelectController;
+        [SerializeField] private UIController uiController;
+        [SerializeField] private TextMeshProUGUI destText;
     
-    public void ToSelect()
-    {
-        placeSelectController.Open(pathController.AvailableNodes, id => { toText.text = id; });
-    }
-
-    public void StartPath()
-    {
-        //TODO path not found popup
-        if (pathController.StartPath(fromText.text, toText.text))
+        public void Open()
         {
+            gameObject.SetActive(true);
+            fade.FadeIn();
+
+            fromText.text = uiController.PathController.FindClosestNode()?.Name;
+        }
+
+        public void Close()
+        {
+            fade.FadeOut( () => {gameObject.SetActive(false);});
+        }
+
+        public void FromSelect()
+        {
+            placeSelectController.Open(uiController.PathController.AvailableNodes.Where(item => item.Visible).Select(item => item.Name).ToList(), id => { fromText.text = id; });
+        }
+    
+        public void ToSelect()
+        {
+            placeSelectController.Open(uiController.seeAliases ? uiController.aliases.Keys.ToList() : uiController.PathController.AvailableNodes.Where(item => item.Visible).Select(item => item.Name).ToList(), id => { toText.text = id; });
+        }
+
+        public void StartPath()
+        {
+            //TODO path not found popup
+
+            string to = uiController.seeAliases ? uiController.aliases[toText.text] : toText.text;
+            string from = fromText.text;
+            
+            if (!uiController.PathController.StartPath(from, to)) return;
+            destText.text = toText.text;
             Close();
         }
     }

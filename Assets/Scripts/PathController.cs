@@ -29,9 +29,14 @@ public class PathController : MonoBehaviour
     public void CancelPath()
     {
         currentPath = new List<PathNode>();
-        int closest = FindClosestPathIndex();
-        if (closest < 0) return;
-        UpdateFullPath(closest);
+        foreach (Transform child in linkContainerPrev)
+        {
+            Destroy(child.gameObject);
+        }
+        foreach (Transform child in linkContainerNext)
+        {
+            Destroy(child.gameObject);
+        }
     }
 
     private void Update()
@@ -101,15 +106,16 @@ public class PathController : MonoBehaviour
 
     public PathNode FindClosestNode()
     {
-        if (availableNodes.Count <= 0)
+        List<PathNode> currNodes = availableNodes.Where(node => node.Visible).ToList();
+        if (currNodes.Count <= 0)
         {
             return null;
         }
 
-        PathNode best = availableNodes[0];
-        float bestDist = Vector3.Distance(availableNodes[0].transform.position, player.transform.position);
+        PathNode best = currNodes[0];
+        float bestDist = Vector3.Distance(currNodes[0].transform.position, player.transform.position);
 
-        foreach (var node in availableNodes)
+        foreach (var node in currNodes)
         {
             float currDist = Vector3.Distance(node.transform.position, player.transform.position);
             if (currDist < bestDist)
