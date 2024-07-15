@@ -9,21 +9,43 @@ public class LinkController : MonoBehaviour
     [SerializeField] private GameObject arrowPrefab;
     [SerializeField] private Transform arrowContainer;
     
-    private float size;
+    public float size;
     private List<GameObject> objPool = new List<GameObject>();
     private float timeElapsed = 0;
+    private PathNode fromNode, toNode;
 
-    public void Initialize(float size)
+    public void Initialize(PathNode from, PathNode to)
     {
-        this.size = size;
+        fromNode = from;
+        toNode = to;
+        
+        
+    }
+
+    private void UpdatePosition()
+    {
+        size = Vector3.Distance(fromNode.gameObject.transform.position, toNode.gameObject.transform.position);
+        
+        Vector3 startPoint = fromNode.transform.position;
+        Vector3 endPoint = toNode.transform.position;
+        
+        Vector3 midpoint = (startPoint + endPoint) / 2f;
+        
+        float distance = Vector3.Distance(startPoint, endPoint);
+        
+        gameObject.transform.position = midpoint;
+        
+        gameObject.transform.rotation = Quaternion.LookRotation(endPoint - startPoint);
         
         Vector3 newScale = bg.transform.localScale;
-        newScale.z = size; 
+        newScale.z = size;
         bg.transform.localScale = newScale;
     }
     
     void Update()
     {
+        UpdatePosition();
+        
         if (timeElapsed > arrowDelay)
         {
             timeElapsed = 0;
@@ -41,7 +63,7 @@ public class LinkController : MonoBehaviour
 
             LinkArrow arrow = curr.GetComponent<LinkArrow>();
             
-            arrow.Initialize(size, () => {objPool.Add(curr);});
+            arrow.Initialize(this, () => {objPool.Add(curr);});
         }
         else
         {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 using TMPro;
 using UnityEngine;
 
@@ -58,5 +59,18 @@ namespace UI
         {
             debugMenu.SetActive(false);
         }
+
+        public void SeeNodePos()
+        {
+            List<string> nodePositions = new List<string>();
+
+            foreach (var node in pathController.AvailableNodes)
+            {
+                nodePositions.Add(node.Name + " " + node.transform.position);
+            }
+            
+            
+        }
+        
     }
 }

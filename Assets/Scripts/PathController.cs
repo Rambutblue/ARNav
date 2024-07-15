@@ -153,21 +153,9 @@ public class PathController : MonoBehaviour
 
     private void CreateLink(PathNode start, PathNode end, Transform linkContainer)
     {
-        Vector3 startPoint = start.transform.position;
-        Vector3 endPoint = end.transform.position;
-        
-        Vector3 midpoint = (startPoint + endPoint) / 2f;
-        
-        float distance = Vector3.Distance(startPoint, endPoint);
-
         GameObject newLink = Instantiate(linkPrefab, linkContainer);
-        
-        newLink.transform.position = midpoint;
-        
-        newLink.transform.rotation = Quaternion.LookRotation(endPoint - startPoint);
-
         LinkController newLinkController = newLink.GetComponent<LinkController>();
-        newLinkController.Initialize(distance);
+        newLinkController.Initialize(start, end);
     }
 
     private List<PathNode> FindPath(string start, string end)

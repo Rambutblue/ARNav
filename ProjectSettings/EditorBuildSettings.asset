@@ -8,9 +8,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Main.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MainSingleAnchor.unity
     guid: 2e78fb13ffc5c1145b00b12d5ab99174
+  - enabled: 1
+    path: Assets/Scenes/MainHlavniNadrazi.unity
+    guid: af5552717c4e4d148acc5cad0ffcc526
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: bf6548335df308a4aba4a69621c1bab4,
       type: 2}

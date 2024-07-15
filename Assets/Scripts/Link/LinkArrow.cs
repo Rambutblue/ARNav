@@ -9,21 +9,21 @@ public class LinkArrow : MonoBehaviour
 {
     [SerializeField] private LinkArrowAlpha arrow1, arrow2;
     [SerializeField] private float speed = 1;
-    
-    private float size = 0;
+
+    private LinkController linkController;   
     private OnArrowEnd onArrowEnd;
 
-    public void Initialize(float size, OnArrowEnd callback)
+    public void Initialize(LinkController linkController, OnArrowEnd callback)
     {
         gameObject.SetActive(true);
-        this.size = size;
+        this.linkController = linkController;
         onArrowEnd = callback;
-        transform.localPosition = new Vector3(0, 0, -(this.size / 2));
+        transform.localPosition = new Vector3(0, 0, -(this.linkController.size / 2));
     }
     
     void Update()
     {
-        if (transform.localPosition.z <= (size / 2))
+        if (transform.localPosition.z <= (linkController.size / 2))
         {
             Vector3 movement = Vector3.forward * (speed * Time.deltaTime);
 
