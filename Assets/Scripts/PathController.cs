@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using Utils;
@@ -16,13 +17,30 @@ public class PathController : MonoBehaviour
 
     private List<PathNode> currentPath = new List<PathNode>();
     private int currClosest = -5;
+
+    private Dictionary<string, Dictionary<string, Vector3>> relativeNodePositions =
+        new Dictionary<string, Dictionary<string, Vector3>>();
+
     public List<PathNode> AvailableNodes => availableNodes;
+
+    private void Start()
+    {
+        foreach (var node in availableNodes)
+        {
+            relativeNodePositions.Add(node.Name, new Dictionary<string, Vector3>());
+            foreach (var neighbour in node.Neighbours)
+            {
+                relativeNodePositions[node.Name].Add(neighbour.first.Name, neighbour.first.transform.position - node.transform.position);
+            }
+        }
+    }
 
     public bool StartPath(string start, string end)
     {
         if (start == end) return false;
         currentPath = FindPath(start, end);
         currClosest = -2;
+
         return currentPath.Count > 0;
     }
 
@@ -41,6 +59,7 @@ public class PathController : MonoBehaviour
 
     private void Update()
     {
+        
         int closest = FindClosestPathIndex();
         if (closest < 0) return;
         if (currentPath.Count <= 0 || closest == currClosest) return;
@@ -80,6 +99,7 @@ public class PathController : MonoBehaviour
         }
 
         currClosest = closest;
+        
     }
 
     private void UpdateFullPath(int closest)
@@ -153,9 +173,11 @@ public class PathController : MonoBehaviour
 
     private void CreateLink(PathNode start, PathNode end, Transform linkContainer)
     {
+        Vector3 relativePos = relativeNodePositions[start.Name][end.Name];
+
         GameObject newLink = Instantiate(linkPrefab, linkContainer);
         LinkController newLinkController = newLink.GetComponent<LinkController>();
-        newLinkController.Initialize(start, end);
+        newLinkController.Initialize(start, end, relativePos);
     }
 
     private List<PathNode> FindPath(string start, string end)

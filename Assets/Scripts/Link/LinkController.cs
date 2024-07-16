@@ -8,31 +8,32 @@ public class LinkController : MonoBehaviour
     [SerializeField] private float arrowDelay;
     [SerializeField] private GameObject arrowPrefab;
     [SerializeField] private Transform arrowContainer;
+    [SerializeField] private GameObject inactiveLink, activeLink;
     
     public float size;
     private List<GameObject> objPool = new List<GameObject>();
     private float timeElapsed = 0;
     private PathNode fromNode, toNode;
+    private Vector3 relativePos;
 
-    public void Initialize(PathNode from, PathNode to)
+    public void Initialize(PathNode from, PathNode to, Vector3 relativePos)
     {
         fromNode = from;
         toNode = to;
-        
-        
+        this.relativePos = relativePos;
     }
 
     private void UpdatePosition()
     {
-        size = Vector3.Distance(fromNode.gameObject.transform.position, toNode.gameObject.transform.position);
-        
         Vector3 startPoint = fromNode.transform.position;
-        Vector3 endPoint = toNode.transform.position;
+        Vector3 endPoint = toNode.gameObject.activeInHierarchy
+            ? toNode.transform.position
+            : fromNode.transform.position + relativePos;
+        
+        size = Vector3.Distance(startPoint, endPoint);
         
         Vector3 midpoint = (startPoint + endPoint) / 2f;
-        
-        float distance = Vector3.Distance(startPoint, endPoint);
-        
+
         gameObject.transform.position = midpoint;
         
         gameObject.transform.rotation = Quaternion.LookRotation(endPoint - startPoint);
@@ -40,12 +41,18 @@ public class LinkController : MonoBehaviour
         Vector3 newScale = bg.transform.localScale;
         newScale.z = size;
         bg.transform.localScale = newScale;
+        inactiveLink.transform.localScale = newScale;
     }
     
     void Update()
     {
         UpdatePosition();
+
+        inactiveLink.SetActive(!toNode.gameObject.activeInHierarchy);
+        activeLink.SetActive(toNode.gameObject.activeInHierarchy);
+        arrowContainer.gameObject.SetActive(toNode.gameObject.activeInHierarchy);
         
+
         if (timeElapsed > arrowDelay)
         {
             timeElapsed = 0;

@@ -66,10 +66,10 @@ namespace UI
 
             foreach (var node in pathController.AvailableNodes)
             {
-                nodePositions.Add(node.Name + " " + node.transform.position);
+                nodePositions.Add(node.Name + " " + node.gameObject.activeInHierarchy + " " + node.transform.position);
             }
             
-            
+            placeSelectController.Open(nodePositions, null);
         }
         
     }
